@@ -19,23 +19,23 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "Endpoints",
+      label: "API Reference",
       collapsed: false,
       items: [
         {
           type: "doc",
           id: "endpoints/wallet-intel",
-          label: "Wallet Intel",
+          label: "Wallet Intelligence",
         },
         {
           type: "doc",
           id: "endpoints/batch-token",
-          label: "Batch & Token",
+          label: "Holder Profiles & Similarity",
         },
         {
           type: "doc",
           id: "endpoints/async-jobs",
-          label: "Async Jobs",
+          label: "Job Polling",
         },
       ],
     },
