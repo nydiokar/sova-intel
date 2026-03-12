@@ -3,39 +3,28 @@ id: wallet-intel
 sidebar_position: 1
 ---
 
-# Wallet Intel
+# Wallet Intelligence
 
-Three endpoints for per-wallet intelligence. All require authentication.
+Per-wallet intelligence endpoints. All require authentication.
 
 ---
 
-## GET /intel/wallet/:addr
+## Full Wallet Profile
 
-**Full wallet profile — 5 credits ($0.075)**
+Complete behavioral analysis, realized/unrealized PnL, HUD signal, and summary metadata for a single wallet.
 
-Returns a complete intelligence profile: behavioral analysis, realized/unrealized PnL, HUD signal, and summary metadata.
+<p class="request-credits">Request credits: <span class="credits-value">5</span></p>
 
-```bash
-curl https://api.sova-intel.com/api/v1/intel/wallet/WALLET_ADDRESS \
-  -H "X-Api-Key: ak_your_key"
-```
-
-### Synchronous hold
-
-For cold or stale wallets the server holds the HTTP connection open while running a flash analysis (up to ~30 seconds). In most cases you receive a `200` in the same call.
-
-On timeout fallback the server returns `202` with a `prepaidJobId`. Poll the job then re-call with `X-Prepaid-Job-Id` — total charge is **5cr regardless of path**.
-
-```
-→ 200  Analysis ready (5cr charged)
-→ 202  Timeout fallback (0cr) — poll job, re-call with X-Prepaid-Job-Id header
-```
+<div class="endpoint-header">
+  <span class="method method-get">GET</span>
+  <span class="endpoint-path">/intel/wallet/:addr</span>
+</div>
 
 ### Parameters
 
 | Name | In | Type | Required | Description |
 |:-----|:---|:-----|:--------:|:------------|
-| `address` | path | string | ✓ | Solana wallet address (base58) |
+| `wallet_address` | path | string | ✓ | Solana wallet address (base58) |
 | `X-Prepaid-Job-Id` | header | string | — | Pass `prepaidJobId` from a 202 response to skip re-charging |
 
 ### Response — 200
@@ -95,28 +84,37 @@ On timeout fallback the server returns `202` with a `prepaidJobId`. Poll the job
 }
 ```
 
-Poll `GET /jobs/{jobId}` until `completed`, then re-call this endpoint with `X-Prepaid-Job-Id: {prepaidJobId}`.
+:::note Synchronous hold
+For cold or stale wallets the server holds the HTTP connection open for up to 30 seconds while running a flash analysis. You receive a `200` directly in most cases.
 
----
+On timeout the server returns `202` with a `prepaidJobId`. Poll until complete, then re-call with `X-Prepaid-Job-Id` header — **5cr total regardless of path**.
+:::
 
-## GET /intel/wallet/:addr/hud
-
-**Wallet HUD signal — 1 credit ($0.015)**
-
-Returns the compact signal: behavior code, win rate, PnL tier, bot/whale flags. The cheapest way to score a wallet.
+<div class="example-label">Example request</div>
 
 ```bash
-curl https://api.sova-intel.com/api/v1/intel/wallet/WALLET_ADDRESS/hud \
+curl https://api.sova-intel.com/api/v1/intel/wallet/WALLET_ADDRESS \
   -H "X-Api-Key: ak_your_key"
 ```
 
-Same synchronous hold and `202` fallback contract as the full profile endpoint above.
+---
+
+## Wallet HUD Signal
+
+The fastest, cheapest signal for a wallet — behavior code, win rate, PnL quality, bot and whale flags. Use this for bulk scoring before deciding whether to pull a full profile.
+
+<p class="request-credits">Request credits: <span class="credits-value">1</span></p>
+
+<div class="endpoint-header">
+  <span class="method method-get">GET</span>
+  <span class="endpoint-path">/intel/wallet/:addr/hud</span>
+</div>
 
 ### Parameters
 
 | Name | In | Type | Required | Description |
 |:-----|:---|:-----|:--------:|:------------|
-| `address` | path | string | ✓ | Solana wallet address (base58) |
+| `wallet_address` | path | string | ✓ | Solana wallet address (base58) |
 | `X-Prepaid-Job-Id` | header | string | — | Pass `prepaidJobId` from a 202 response |
 
 ### Response — 200
@@ -124,9 +122,7 @@ Same synchronous hold and `202` fallback contract as the full profile endpoint a
 ```json
 {
   "walletAddress": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
-  "signalType": "wallet_behavior_v1",
   "behaviorCode": "SWING_TRADER",
-  "behaviorCategory": "SWING_TRADER",
   "winRate": 0.67,
   "trimmedMeanPnl": 12.4,
   "avgTxValueSol": 2.45,
@@ -150,18 +146,29 @@ Same synchronous hold and `202` fallback contract as the full profile endpoint a
 | `BRONZE` | Low confidence — limited history |
 | `INSUFFICIENT` | Not enough data to score |
 
----
+:::note Synchronous hold
+Same 30s hold and `202` fallback contract as the full profile endpoint above.
+:::
 
-## GET /intel/wallet/:addr/tokens
-
-**Per-token PnL table — 3 credits ($0.045)**
-
-Returns a paginated, sortable table of realized/unrealized PnL broken down by token.
+<div class="example-label">Example request</div>
 
 ```bash
-curl "https://api.sova-intel.com/api/v1/intel/wallet/WALLET_ADDRESS/tokens?pageSize=50&sortBy=realizedPnlSol&sortOrder=DESC" \
+curl https://api.sova-intel.com/api/v1/intel/wallet/WALLET_ADDRESS/hud \
   -H "X-Api-Key: ak_your_key"
 ```
+
+---
+
+## Per-Token PnL Breakdown
+
+Paginated, sortable table of realized and unrealized PnL broken down by token. Useful for auditing which tokens drove a wallet's performance.
+
+<p class="request-credits">Request credits: <span class="credits-value">3</span></p>
+
+<div class="endpoint-header">
+  <span class="method method-get">GET</span>
+  <span class="endpoint-path">/intel/wallet/:addr/tokens</span>
+</div>
 
 ### Query Parameters
 
@@ -190,4 +197,76 @@ curl "https://api.sova-intel.com/api/v1/intel/wallet/WALLET_ADDRESS/tokens?pageS
   "page": 1,
   "pageSize": 20
 }
+```
+
+<div class="example-label">Example request</div>
+
+```bash
+curl "https://api.sova-intel.com/api/v1/intel/wallet/WALLET_ADDRESS/tokens?pageSize=50&sortBy=realizedPnlSol&sortOrder=DESC" \
+  -H "X-Api-Key: ak_your_key"
+```
+
+---
+
+## Batch Wallet Scoring
+
+Score up to 30 wallets in a single call. Wallets without fresh data are automatically queued for flash analysis — no pre-analysis step needed.
+
+<p class="request-credits">Request credits: <span class="credits-value">5</span> flat</p>
+
+<div class="endpoint-header">
+  <span class="method method-post">POST</span>
+  <span class="endpoint-path">/intel/wallets/batch-hud</span>
+</div>
+
+### Request Body
+
+| Field | Type | Required | Description |
+|:------|:-----|:--------:|:------------|
+| `wallets` | string[] | ✓ | 1–30 Solana wallet addresses |
+
+### Response — 200
+
+```json
+{
+  "huds": {
+    "ADDR_1": {
+      "walletAddress": "ADDR_1",
+      "behaviorCode": "SWING_TRADER",
+      "winRate": 0.67,
+      "trimmedMeanPnl": 12.4,
+      "dataQualityTier": "GOLD",
+      "isBot": false,
+      "isWhale": false,
+      "calculatedAt": "2026-03-03T11:30:00.000Z"
+    }
+  },
+  "queued": [
+    {
+      "walletAddress": "ADDR_2",
+      "jobId": "intel-batch-abc123",
+      "monitoringUrl": "/api/v1/jobs/intel-batch-abc123"
+    }
+  ],
+  "skipped": ["ADDR_3"]
+}
+```
+
+| Field | Description |
+|:------|:------------|
+| `huds` | Map of `address → WalletHud` for wallets with fresh data |
+| `queued` | Wallets that had no data — flash analysis auto-queued, poll and re-call |
+| `skipped` | Known system/program wallets — no analysis possible |
+
+:::note
+Call again after queued jobs complete to retrieve the remaining HUDs. Total charge is 5cr per call regardless of how many wallets are ready.
+:::
+
+<div class="example-label">Example request</div>
+
+```bash
+curl -X POST https://api.sova-intel.com/api/v1/intel/wallets/batch-hud \
+  -H "X-Api-Key: ak_your_key" \
+  -H "Content-Type: application/json" \
+  -d '{"wallets": ["ADDR_1", "ADDR_2", "ADDR_3"]}'
 ```

@@ -41,6 +41,11 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "doc",
+      id: "reference",
+      label: "Behavior Reference",
+    },
+    {
+      type: "doc",
       id: "sdk",
       label: "TypeScript SDK",
     },

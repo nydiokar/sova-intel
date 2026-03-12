@@ -5,86 +5,22 @@ sidebar_position: 2
 
 # Holder Profiles & Similarity
 
-Endpoints for batch wallet scoring and token holder analysis.
+Deep behavioral analysis across token holders and wallet groups.
 
 ---
 
-## POST /intel/wallets/batch-hud
+## Token Holder Profiles
 
-**Batch HUD for up to 30 wallets — 5 credits flat ($0.075)**
+Returns behavioral profiles for the top N holders of any token — trader type, hold time, exit pattern, PnL, and a full distribution breakdown across the holder base. Useful for understanding who actually holds a token and how they trade it.
 
-Returns HUD signals for multiple wallets in a single call. 5 credits regardless of how many wallets have data.
+<p class="request-credits">Request credits: <span class="credits-value">20</span></p>
 
-Wallets without data in the database appear in `notFound`. Analyze them individually with [`GET /intel/wallet/:addr`](/endpoints/wallet-intel#get-intelwalletaddr) to populate them.
-
-```bash
-curl -X POST https://api.sova-intel.com/api/v1/intel/wallets/batch-hud \
-  -H "X-Api-Key: ak_your_key" \
-  -H "Content-Type: application/json" \
-  -d '{"wallets": ["ADDR_1", "ADDR_2", "ADDR_3"]}'
-```
+<div class="endpoint-header">
+  <span class="method method-post">POST</span>
+  <span class="endpoint-path">/intel/token/:mint/holders</span>
+</div>
 
 ### Request Body
-
-```json
-{
-  "wallets": ["ADDR_1", "ADDR_2", "ADDR_3"]
-}
-```
-
-| Field | Type | Required | Description |
-|:------|:-----|:--------:|:------------|
-| `wallets` | string[] | ✓ | 1–30 Solana wallet addresses |
-
-### Response — 200
-
-```json
-{
-  "huds": {
-    "ADDR_1": {
-      "walletAddress": "ADDR_1",
-      "behaviorCode": "SWING_TRADER",
-      "winRate": 0.67,
-      "trimmedMeanPnl": 12.4,
-      "dataQualityTier": "GOLD",
-      "isBot": false,
-      "isWhale": false,
-      "calculatedAt": "2026-03-03T11:30:00.000Z"
-    }
-  },
-  "notFound": ["ADDR_3"],
-  "calculatedAt": "2026-03-03T11:30:00.000Z"
-}
-```
-
-| Field | Description |
-|:------|:------------|
-| `huds` | Map of `walletAddress → WalletHud` for wallets with data |
-| `notFound` | Addresses with no data in DB |
-| `calculatedAt` | Timestamp of the batch response |
-
----
-
-## POST /intel/token/:mint/holders
-
-**Top N token holders with behavioral profiles — 20 credits ($0.30)**
-
-Queues an async analysis of the top N holders of the given token. Returns HTTP `202` immediately — the job runs in the background.
-
-```bash
-curl -X POST https://api.sova-intel.com/api/v1/intel/token/TOKEN_MINT/holders \
-  -H "X-Api-Key: ak_your_key" \
-  -H "Content-Type: application/json" \
-  -d '{"topN": 20}'
-```
-
-### Request Body
-
-```json
-{
-  "topN": 20
-}
-```
 
 | Field | Type | Default | Description |
 |:------|:-----|:--------|:------------|
@@ -101,22 +37,11 @@ curl -X POST https://api.sova-intel.com/api/v1/intel/token/TOKEN_MINT/holders \
 }
 ```
 
-### Retrieving results
-
-Poll `GET /jobs/{jobId}` until `status: completed`, then fetch:
-
-```bash
-curl "https://api.sova-intel.com/api/v1/jobs/result/by-key?key=holder-profiles:result:intel-holders-abc123" \
-  -H "X-Api-Key: ak_your_key"
-```
-
-:::note Result key
-Use the **`jobId`** (not `requestId`) in the result key: `holder-profiles:result:{jobId}`
-:::
-
-Result keys expire after **15 minutes**.
+Poll `GET /jobs/{jobId}` until `status: completed`, then fetch the result.
 
 ### Result shape
+
+Each profile in the `profiles` array contains:
 
 ```json
 {
@@ -130,42 +55,75 @@ Result keys expire after **15 minutes**.
       "behaviorType": "SWING_TRADER",
       "exitPattern": "partial_exit",
       "medianHoldTimeHours": 18.0,
+      "avgHoldTimeHours": 22.1,
+      "dailyFlipRatio": 0.04,
       "dataQualityTier": "GOLD",
       "confidence": 0.91,
-      "completedCycleCount": 47
+      "completedCycleCount": 47,
+      "tokenHoldingValueSol": 12.4,
+      "walletRealizedPnlSol": 84.2,
+      "walletPnlSol": 91.5,
+      "exitRate": 0.72,
+      "totalTokensTraded": 134,
+      "knownType": null,
+      "knownLabel": null,
+      "analysisSkipped": false
     }
   ],
   "metadata": {
     "totalHoldersRequested": 20,
     "totalHoldersAnalyzed": 18,
     "totalProcessingTimeMs": 12400,
-    "avgProcessingTimePerWalletMs": 689
+    "avgProcessingTimePerWalletMs": 689,
+    "failedHolders": 2
   }
 }
 ```
 
----
+**Key profile fields:**
 
-## POST /intel/wallets/similarity
+| Field | Description |
+|:------|:------------|
+| `behaviorType` | `SNIPER` `SCALPER` `MOMENTUM` `INTRADAY` `DAY_TRADER` `SWING` `POSITION` `HODLER` — or `null` |
+| `exitPattern` | `partial_exit` or `all_at_once` |
+| `dailyFlipRatio` | Share of positions held under 5 minutes |
+| `dataQualityTier` | `GOLD` `SILVER` `BRONZE` `INSUFFICIENT` |
+| `confidence` | Analysis confidence score (0–1) |
+| `walletRealizedPnlSol` | Wallet's all-time realized PnL in SOL |
+| `analysisSkipped` | `true` for known system wallets (burn, LP, etc.) — `knownLabel` explains why |
 
-**Wallet similarity analysis — 20 credits ($0.30)**
+**Note:** `behaviorType: null` means fewer than 2 completed exits — not an error. The wallet is a current or fresh holder that hasn't sold enough to classify. Check `completedCycleCount`. See [Behavior Reference](/reference) for all thresholds.
 
-Identifies behavioral clusters and trading pattern overlap across 2–30 wallets. Useful for detecting coordinated wallets, insider groups, or shared strategies.
+:::note Result key
+Use the **`jobId`** (not `requestId`) in the result key. Result keys expire after **15 minutes**.
+```
+GET /jobs/result/by-key?key=holder-profiles:result:{jobId}
+```
+:::
+
+<div class="example-label">Example request</div>
 
 ```bash
-curl -X POST https://api.sova-intel.com/api/v1/intel/wallets/similarity \
+curl -X POST https://api.sova-intel.com/api/v1/intel/token/TOKEN_MINT/holders \
   -H "X-Api-Key: ak_your_key" \
   -H "Content-Type: application/json" \
-  -d '{"wallets": ["ADDR_1", "ADDR_2", "ADDR_3"]}'
+  -d '{"topN": 20}'
 ```
+
+---
+
+## Wallet Similarity Analysis
+
+Detects behavioral overlap and coordinated trading patterns across 2–30 wallets. Returns pairwise similarity scores (token overlap + capital-weighted), global metrics, and detected clusters. Useful for identifying insider groups, coordinated wallets, or shared strategies.
+
+<p class="request-credits">Request credits: <span class="credits-value">20</span></p>
+
+<div class="endpoint-header">
+  <span class="method method-post">POST</span>
+  <span class="endpoint-path">/intel/wallets/similarity</span>
+</div>
 
 ### Request Body
-
-```json
-{
-  "wallets": ["ADDR_1", "ADDR_2", "ADDR_3"]
-}
-```
 
 | Field | Type | Required | Description |
 |:------|:-----|:--------:|:------------|
@@ -182,19 +140,62 @@ curl -X POST https://api.sova-intel.com/api/v1/intel/wallets/similarity \
 }
 ```
 
-### Retrieving results
+Poll `GET /jobs/{jobId}` until `status: completed`, then fetch the result.
 
-Poll `GET /jobs/{jobId}` until `status: completed`, then fetch:
+### Result shape
 
-```bash
-curl "https://api.sova-intel.com/api/v1/jobs/result/by-key?key=similarity:result:intel-similarity-1234-xyz" \
-  -H "X-Api-Key: ak_your_key"
+```json
+{
+  "vectorTypeUsed": "combined",
+  "globalMetrics": {
+    "averageSimilarity": 0.73,
+    "mostSimilarPairs": [
+      {
+        "walletA": "ADDR_1",
+        "walletB": "ADDR_2",
+        "similarityScore": 0.91,
+        "sharedTokenCount": 14
+      }
+    ]
+  },
+  "pairwiseSimilarities": [
+    {
+      "walletA": "ADDR_1",
+      "walletB": "ADDR_2",
+      "binaryScore": 0.91,
+      "capitalScore": 0.87,
+      "sharedTokens": [{ "mint": "TOKEN_MINT" }],
+      "binarySharedTokenCount": 14,
+      "capitalSharedTokenCount": 11
+    }
+  ],
+  "uniqueTokensPerWallet": {
+    "ADDR_1": { "binary": 22, "capital": 18 }
+  },
+  "walletLabels": {
+    "ADDR_1": { "knownType": null, "knownLabel": null }
+  }
+}
 ```
 
+| Field | Description |
+|:------|:------------|
+| `binaryScore` | Jaccard overlap — what fraction of tokens are shared |
+| `capitalScore` | Capital-weighted overlap — accounts for position sizing |
+| `globalMetrics.averageSimilarity` | Mean similarity across all pairs |
+
 :::note Result key
-Use the **`requestId`** (not `jobId`) in the similarity result key: `similarity:result:{requestId}`
+Use the **`requestId`** (not `jobId`) in the similarity result key. Result keys expire after **15 minutes**.
+```
+GET /jobs/result/by-key?key=similarity:result:{requestId}
+```
 :::
 
-Result keys expire after **15 minutes**.
+<div class="example-label">Example request</div>
 
-See the [Async Jobs](/endpoints/async-jobs) page for the full polling flow.
+```bash
+curl -X POST https://api.sova-intel.com/api/v1/intel/wallets/similarity \
+  -H "X-Api-Key: ak_your_key" \
+  -H "Content-Type: application/json" \
+  -d '{"wallets": ["ADDR_1", "ADDR_2", "ADDR_3"]}'
+```

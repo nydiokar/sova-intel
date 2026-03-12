@@ -139,3 +139,110 @@ td {
   border-top: 1px solid var(--ifm-toc-border-color);
   margin: 2.5rem 0;
 }
+
+/* ── Endpoint method badges ─────────────────────────────────────────────── */
+
+.endpoint-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0 1rem;
+  padding: 0.65rem 1rem;
+  background: var(--ifm-code-background);
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.method {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.method-get {
+  background: rgba(52, 168, 83, 0.15);
+  color: #1e8a3c;
+  border: 1px solid rgba(52, 168, 83, 0.3);
+}
+
+.method-post {
+  background: rgba(66, 133, 244, 0.15);
+  color: #1a56c4;
+  border: 1px solid rgba(66, 133, 244, 0.3);
+}
+
+[data-theme='dark'] .method-get {
+  background: rgba(52, 168, 83, 0.12);
+  color: #4ade80;
+  border-color: rgba(52, 168, 83, 0.25);
+}
+
+[data-theme='dark'] .method-post {
+  background: rgba(96, 165, 250, 0.12);
+  color: #60a5fa;
+  border-color: rgba(96, 165, 250, 0.25);
+}
+
+.endpoint-path {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ifm-heading-color);
+  letter-spacing: -0.01em;
+}
+
+.endpoint-cost {
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+  background: rgba(108, 92, 231, 0.08);
+  border: 1px solid rgba(108, 92, 231, 0.18);
+  border-radius: 4px;
+  padding: 0.2rem 0.55rem;
+  white-space: nowrap;
+}
+
+[data-theme='dark'] .endpoint-cost {
+  background: rgba(169, 155, 242, 0.1);
+  border-color: rgba(169, 155, 242, 0.2);
+}
+
+/* Credits line */
+.request-credits {
+  font-size: 0.875rem;
+  color: var(--ifm-color-secondary-darkest);
+  margin: 0.75rem 0 0.25rem;
+}
+
+.request-credits .credits-value {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ifm-color-primary);
+}
+
+[data-theme='dark'] .request-credits {
+  color: var(--ifm-color-secondary-light);
+}
+
+/* Example request label */
+.example-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ifm-color-secondary-darkest);
+  margin: 1.25rem 0 0.35rem;
+}
+
+[data-theme='dark'] .example-label {
+  color: var(--ifm-color-secondary-light);
+}
