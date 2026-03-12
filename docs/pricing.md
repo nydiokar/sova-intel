@@ -7,6 +7,12 @@ sidebar_position: 3
 
 Sova Intel uses a credit-based pricing model. **1 credit = $0.015 USDC.**
 
+## Free Endpoints
+
+| Endpoint | Auth | Description |
+|:---------|:----:|:------------|
+| `GET /intel/pricing` | None | Returns current credit prices and pack options |
+
 ## Endpoint Prices
 
 | Endpoint | Credits | USD |

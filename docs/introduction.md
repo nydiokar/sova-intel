@@ -27,6 +27,10 @@ Sova Intel turns raw Solana transaction history into actionable intelligence. In
 - **Holder maps** — top N holders of any token with behavioral profiles
 - **Wallet similarity** — cluster analysis across 2–30 wallets
 
+:::tip AI agents & LLM integrations
+A machine-readable skill descriptor is served at [`https://api.sova-intel.com/skill.md`](https://api.sova-intel.com/skill.md) — use it to wire Sova Intel into any LLM agent or MCP-compatible tool without reading these docs manually.
+:::
+
 ## Getting Started
 
 ### 1. Get an API key

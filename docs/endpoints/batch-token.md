@@ -3,7 +3,7 @@ id: batch-token
 sidebar_position: 2
 ---
 
-# Batch & Token
+# Holder Profiles & Similarity
 
 Endpoints for batch wallet scoring and token holder analysis.
 

@@ -119,8 +119,14 @@ for (const holder of result.profiles) {
 ### Similarity analysis — async (20cr)
 
 ```typescript
-const result = await client.pollSimilarity(["addr1", "addr2", "addr3"]);
-console.log(result);
+import type { SimilarityResult } from "@sova-intel/sdk";
+
+const result = await client.pollSimilarity<SimilarityResult>(["addr1", "addr2", "addr3"]);
+
+console.log(result.globalMetrics.averageSimilarity);   // 0.73
+for (const pair of result.pairwiseSimilarities) {
+  console.log(pair.walletA, pair.walletB, pair.binaryScore, pair.capitalScore);
+}
 ```
 
 ## Client Configuration
@@ -171,6 +177,9 @@ import type {
   BatchHudResponse,
   HolderProfile,
   HolderProfilesResult,
+  SimilarityResult,
+  SimilarityPairResult,
+  SimilarityGlobalMetrics,
   JobAcceptedResponse,
   JobStatus,
   SovaIntelClientConfig,
