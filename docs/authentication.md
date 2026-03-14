@@ -9,14 +9,27 @@ All Intel endpoints require authentication. Two methods are supported.
 
 ## API Key
 
-The simplest method. Pass your key in the `X-Api-Key` header on every request. Credits are deducted from the key owner's account on each successful response.
+The simplest method. Pass your key in the `X-Api-Key` header on every request. Credits are deducted from your account on each successful response.
 
 ```bash
 curl https://api.sova-intel.com/api/v1/intel/wallet/WALLET_ADDRESS/hud \
   -H "X-Api-Key: ak_your_key"
 ```
 
-Keys have the format `ak_<hex>`. Contact the Sova team to get one.
+API keys use the format `ak_<hex>`.
+
+### Create your own API key
+
+Any signed-in user can create their own API keys from the Sova Intel dashboard:
+
+1. Sign up or sign in.
+2. Open the user menu in the top-right corner.
+3. Click **API Keys**.
+4. On the API Keys page (`/dashboard/developer`), enter a description for the key.
+5. Click **Generate**.
+6. Copy the raw key immediately. It is shown only once.
+
+You can create multiple keys, see their status later, and revoke keys you no longer need. This is fully self-serve; no manual approval from the Sova team is required.
 
 ## X402 — Autonomous Solana USDC Payment
 

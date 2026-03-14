@@ -37,7 +37,9 @@ Any agent that is already x402-capable — able to pay for services on-chain —
 
 ### 1. Get an API key
 
-Contact the Sova team to get an `ak_` prefixed API key, or use [X402 autonomous payment](/authentication#x402-autonomous-solana-usdc-payment) to pay per-call directly from a Solana wallet with no key required.
+You can create your own API key in the Sova Intel dashboard. Sign up or sign in, open the user menu in the top-right corner, click **API Keys**, enter a short description, and click **Generate**.
+
+The raw key is shown exactly once, so copy it before leaving the page. API requests made with that key deduct credits from your account balance. If you do not want to use credits or a dashboard account, you can also use [X402 autonomous payment](/authentication#x402-autonomous-solana-usdc-payment) to pay per-call directly from a Solana wallet with no key required.
 
 ### 2. Make your first call
 
