@@ -72,6 +72,12 @@ const profile = await client.getWalletProfile("7xKXtg...");
 console.log(profile.summary.realizedPnl);         // 142.87
 console.log(profile.behavior?.tradingStyle);       // "swing"
 console.log(profile.pnl?.allTime?.netPnlSol);     // 152.17
+
+// KOL identity — present when the wallet belongs to a known trader
+if (profile.kol) {
+  console.log(profile.kol.name);     // "Ansem"
+  console.log(profile.kol.twitter);  // "https://x.com/blknoiz06"
+}
 ```
 
 ### Per-token PnL table (3cr)
@@ -169,6 +175,7 @@ import type {
   WalletProfileResponse,
   WalletSummary,
   WalletBehavior,
+  KolIdentity,
   PnlAllTime,
   DataQualityTier,
   TokenPnlRow,

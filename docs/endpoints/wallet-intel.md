@@ -42,6 +42,11 @@ Complete behavioral analysis, realized/unrealized PnL, HUD signal, and summary m
     "knownType": null,
     "knownLabel": null
   },
+  "kol": {
+    "name": "Ansem",
+    "twitter": "https://x.com/blknoiz06",
+    "telegram": null
+  },
   "hud": {
     "behaviorCode": "SWING_TRADER",
     "winRate": 0.67,
@@ -70,6 +75,17 @@ Complete behavioral analysis, realized/unrealized PnL, HUD signal, and summary m
   }
 }
 ```
+
+| Field | Type | Description |
+|:------|:-----|:------------|
+| `kol` | object \| null | Present when this wallet belongs to a known Key Opinion Leader. `null` for regular wallets. |
+| `kol.name` | string | Public name of the KOL |
+| `kol.twitter` | string \| null | Twitter/X profile URL |
+| `kol.telegram` | string \| null | Telegram profile or channel URL |
+
+:::note KOL wallets
+KOL wallets are analyzed identically to any other trader — full PnL, behavior, and HUD data is available. The `kol` field is purely additive identity context.
+:::
 
 ### Response — 202 (timeout fallback)
 
