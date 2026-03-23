@@ -199,3 +199,75 @@ curl -X POST https://api.sova-intel.com/api/v1/intel/wallets/similarity \
   -H "Content-Type: application/json" \
   -d '{"wallets": ["ADDR_1", "ADDR_2", "ADDR_3"]}'
 ```
+
+---
+
+## Bundled Deep Analysis
+
+Holder profiles + similarity in a single call at a discount. The server discovers holder addresses itself — no need to supply them upfront. The processor chains the similarity job automatically once holder-profiles completes.
+
+**35cr** vs 40cr for the two-step manual flow.
+
+<p class="request-credits">Request credits: <span class="credits-value">35</span></p>
+
+<div class="endpoint-header">
+  <span class="method method-post">POST</span>
+  <span class="endpoint-path">/intel/token/:mint/holders/deep</span>
+</div>
+
+### Request Body
+
+| Field | Type | Default | Description |
+|:------|:-----|:--------|:------------|
+| `topN` | integer | `20` | Number of top holders to analyze (1–50) |
+
+### Response — 202
+
+Both job descriptors are returned immediately. `similarity.jobId` is `null` — the similarity job is queued by the processor internally after holder-profiles completes.
+
+```json
+{
+  "status": "queued",
+  "tokenMint": "So11111111111111111111111111111111111111112",
+  "topN": 20,
+  "holderProfiles": {
+    "jobId": "hp-job-abc123",
+    "requestId": "intel-holders-deep-1234-abc",
+    "monitoringUrl": "/api/v1/jobs/hp-job-abc123"
+  },
+  "similarity": {
+    "jobId": null,
+    "requestId": "intel-holders-deep-sim-1234-xyz",
+    "resultKey": "similarity:result:intel-holders-deep-sim-1234-xyz",
+    "message": "Similarity job will be queued automatically after holder-profiles completes. Poll resultKey for result."
+  },
+  "message": "Bundled holder-profiles + similarity queued. Poll holderProfiles.monitoringUrl until completed, then poll similarity.resultKey."
+}
+```
+
+### Polling strategy
+
+```
+1. Poll GET /jobs/{holderProfiles.jobId} until status: completed
+   → processor discovers holder addresses and auto-queues similarity
+
+2. Poll GET /jobs/result/by-key?key={similarity.resultKey}
+   → 404 while similarity is still running
+   → 200 with SimilarityResult when done
+```
+
+:::note Result keys
+- Holder profiles result: `holder-profiles:result:{holderProfiles.jobId}` (key by **jobId**)
+- Similarity result: `{similarity.resultKey}` as returned in the response (key by **requestId**)
+
+Both expire after **15 minutes**.
+:::
+
+<div class="example-label">Example request</div>
+
+```bash
+curl -X POST https://api.sova-intel.com/api/v1/intel/token/TOKEN_MINT/holders/deep \
+  -H "X-Api-Key: ak_your_key" \
+  -H "Content-Type: application/json" \
+  -d '{"topN": 20}'
+```

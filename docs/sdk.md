@@ -135,6 +135,35 @@ for (const pair of result.pairwiseSimilarities) {
 }
 ```
 
+### Bundled deep analysis — async (35cr)
+
+Holder profiles + similarity in one call. The server discovers holder addresses itself — no need to supply them upfront. Results are returned sequentially: holder-profiles first, then similarity (chained automatically by the processor).
+
+```typescript
+import type { HolderProfilesResult, SimilarityResult } from "@sova-intel/sdk";
+
+const { holderProfiles, similarity } = await client.pollDeepAnalysis<
+  HolderProfilesResult,
+  SimilarityResult
+>("So11111111111111111111111111111111111111112", 20);
+
+for (const holder of holderProfiles.profiles) {
+  console.log(holder.rank, holder.walletAddress, holder.behaviorType);
+}
+console.log(similarity.globalMetrics.averageSimilarity);
+```
+
+If you want the job descriptors without blocking, use `queueDeepAnalysis`:
+
+```typescript
+const jobs = await client.queueDeepAnalysis("TOKEN_MINT", 20);
+
+// jobs.holderProfiles.jobId — poll this first
+// jobs.similarity.resultKey — poll this after holderProfiles completes
+console.log(jobs.holderProfiles.monitoringUrl);
+console.log(jobs.similarity.resultKey);
+```
+
 ## Client Configuration
 
 ```typescript
@@ -188,6 +217,7 @@ import type {
   SimilarityPairResult,
   SimilarityGlobalMetrics,
   JobAcceptedResponse,
+  DeepJobAcceptedResponse,
   JobStatus,
   SovaIntelClientConfig,
   Auth,
@@ -208,3 +238,5 @@ import type {
 | `pollHolderProfiles(mint, topN?)` | same + auto-poll | 20 |
 | `queueSimilarity(wallets[])` | `POST /intel/wallets/similarity` | 20 |
 | `pollSimilarity(wallets[])` | same + auto-poll | 20 |
+| `queueDeepAnalysis(mint, topN?)` | `POST /intel/token/:mint/holders/deep` | 35 |
+| `pollDeepAnalysis(mint, topN?)` | same + auto-poll both results | 35 |
