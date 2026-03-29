@@ -1,21 +1,20 @@
 <div align="center">
-  <img src="./static/img/logo.svg" alt="Sova Intel" height="72" />
   <h1>Sova Intel</h1>
   <p><strong>On-chain trader intelligence for Solana.</strong></p>
   <p>
-    <a href="https://docs.sova-intel.com">Documentation</a> ·
+    <a href="https://docs.sova-intel.com">Docs</a> ·
     <a href="https://sova-intel.com">Dashboard</a> ·
     <a href="https://www.npmjs.com/package/@sova-intel/sdk"><img alt="npm" src="https://img.shields.io/npm/v/@sova-intel/sdk.svg?style=flat-square&labelColor=000&color=blueviolet" /></a>
   </p>
+  <br />
+  <img src="./static/demo.gif" alt="Sova Intel — agentic capabilities demo" width="760" />
 </div>
 
 ---
 
-<div align="center">
-  <img src="./static/demo.gif" alt="Sova Intel agent demo" width="720" />
-</div>
+One API call. A complete picture of how any Solana wallet trades — behavior type, win rate, hold times, PnL, bot/whale flags, and data quality tier. No swap parsing, no heuristics to build yourself.
 
-One API call. A complete picture of how any Solana wallet trades — behavior type, win rate, hold times, PnL, bot/whale flags, and data quality tier. No swap parsing, no heuristics you have to build yourself.
+Purpose-built for AI agents: compact payloads, async job polling, and x402 autonomous payment so agents can call the API with zero human setup.
 
 ## What you can do
 
@@ -84,22 +83,6 @@ Zero dependencies. Fully typed. Async-aware with built-in job polling. → [SDK 
 
 **X402** — No account needed. Any [x402-capable](https://x402.org) agent pays per call directly from a Solana wallet. A machine-readable skill descriptor at [`sova-intel.com/skill.md`](https://www.sova-intel.com/skill.md) tells the agent exactly what to call — payment is automatic.
 
-## Running the docs locally
-
-```bash
-npm install
-npm start        # dev server at http://localhost:3000
-npm run build    # production build → build/
-```
-
-Requires Node ≥ 20.
-
 ## Contributing
 
 Documentation lives in `docs/`. Each file maps to a page on [docs.sova-intel.com](https://docs.sova-intel.com). PRs for corrections, clarity improvements, and example additions are welcome.
-
----
-
-<div align="center">
-  <sub>Built on <a href="https://docusaurus.io">Docusaurus</a> · API base: <code>https://api.sova-intel.com/api/v1</code></sub>
-</div>
