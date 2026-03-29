@@ -76,7 +76,8 @@ See the [SDK Quickstart](/sdk) for full setup and examples.
 | Category | Endpoints | Auth Required |
 |:---------|:----------|:--------------|
 | [Wallet Intelligence](/endpoints/wallet-intel) | Full profile, HUD signal, per-token PnL, batch scoring | Yes |
-| [Holder Profiles & Similarity](/endpoints/batch-token) | Token holder profiles, wallet similarity | Yes |
+| [Holder Profiles & Similarity](/endpoints/batch-token) | Token holder profiles, wallet similarity, bundled deep analysis | Yes |
+| [Agent-Optimised](/endpoints/batch-token#token-holder-profiles--agent) | Compact holder profiles + similarity results for LLM agents | Yes |
 | [Job Polling](/endpoints/async-jobs) | Job status polling, result fetch | Status: no — Result: yes |
 | [Pricing](/pricing) | Credit costs and pack options | No |
 | [skill.md](https://www.sova-intel.com/skill.md) | Machine-readable descriptor for x402-capable agents | No |

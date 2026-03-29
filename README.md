@@ -11,6 +11,10 @@
 
 ---
 
+<div align="center">
+  <img src="./static/demo.gif" alt="Sova Intel agent demo" width="720" />
+</div>
+
 One API call. A complete picture of how any Solana wallet trades — behavior type, win rate, hold times, PnL, bot/whale flags, and data quality tier. No swap parsing, no heuristics you have to build yourself.
 
 ## What you can do
@@ -21,6 +25,19 @@ One API call. A complete picture of how any Solana wallet trades — behavior ty
 | **Holder Profiles** | Behavioral breakdown of top-N holders for any token — who holds it and how likely they are to sell |
 | **Wallet Similarity** | Detect coordinated wallets, insider groups, and shared strategies across 2–30 addresses |
 | **Bundled Deep Analysis** | Holder profiles + similarity in a single call |
+| **Agent-Optimised Endpoints** | Compact result shapes purpose-built for LLM agents — aggregate-first, ~10× smaller payloads |
+
+## Built for AI agents
+
+Sova Intel has dedicated agent endpoints that return compact, pre-structured results designed to fit inside a tool call response without hitting token limits.
+
+**`POST /intel/token/:mint/holders/agent`** — Same holder-profiles analysis, but the result leads with a population-level aggregate block (behavior distribution, supply concentration, average PnL) so an agent can make a buy/skip decision without scanning 20 individual profiles. `currentHoldings[]` is replaced with a 5-entry `holdingsSummary`. Target: ~1–2k tokens vs ~10k+ for the full shape.
+
+**`POST /intel/wallets/similarity/agent`** — Same similarity analysis, but the result leads with a single `coordinationScore` (0–1). Only pairs with real signal are included; pairs that cross coordination thresholds get a `flag` (`HIGH_SIMILARITY`, `HIGH_OVERLAP`, or `HIGH_SIMILARITY_AND_OVERLAP`).
+
+Both agent endpoints cost the same credits as their standard counterparts. The full developer result is also stored and accessible via `resultKey` in the same 202 response.
+
+**x402 autonomous payment** — Any x402-capable agent can call the API with no API key or account. A machine-readable skill descriptor at [`sova-intel.com/skill.md`](https://www.sova-intel.com/skill.md) tells the agent exactly what to call — payment is automatic from a Solana wallet.
 
 ## Quick start
 
@@ -50,9 +67,12 @@ npm install @sova-intel/sdk
 ```
 
 ```typescript
-import { SovaClient } from '@sova-intel/sdk';
+import { SovaIntelClient } from '@sova-intel/sdk';
 
-const client = new SovaClient({ apiKey: 'ak_your_key' });
+const client = new SovaIntelClient({
+  baseUrl: 'https://api.sova-intel.com/api/v1',
+  auth: { kind: 'apikey', apiKey: 'ak_your_key' },
+});
 const hud = await client.getWalletHud('7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU');
 ```
 

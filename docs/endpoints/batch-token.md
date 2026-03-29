@@ -112,6 +112,115 @@ curl -X POST https://api.sova-intel.com/api/v1/intel/token/TOKEN_MINT/holders \
 
 ---
 
+## Token Holder Profiles — Agent
+
+Same analysis as `/holders`, but the result is transformed into a compact, agent-friendly shape. An aggregate block with population-level signal is prepended. `currentHoldings[]` on each profile is replaced with `holdingsSummary` (top 5 holdings + total count). Target size is ~1–2k tokens vs ~10k+ for the full shape.
+
+<p class="request-credits">Request credits: <span class="credits-value">20</span></p>
+
+<div class="endpoint-header">
+  <span class="method method-post">POST</span>
+  <span class="endpoint-path">/intel/token/:mint/holders/agent</span>
+</div>
+
+### Request Body
+
+| Field | Type | Default | Description |
+|:------|:-----|:--------|:------------|
+| `topN` | integer | `20` | Number of top holders to analyze (1–50) |
+
+### Response — 202
+
+```json
+{
+  "status": "queued",
+  "tokenMint": "So11111111111111111111111111111111111111112",
+  "topN": 20,
+  "jobId": "intel-holders-agent-abc123",
+  "requestId": "intel-holders-agent-1234-abc",
+  "monitoringUrl": "/api/v1/jobs/intel-holders-agent-abc123",
+  "resultKey": "holder-profiles:result:intel-holders-agent-abc123",
+  "agentResultKey": "holder-profiles:agent:result:intel-holders-agent-abc123"
+}
+```
+
+Poll `GET /jobs/{jobId}` until `status: completed`, then fetch the agent result using `agentResultKey`. The full developer result remains available at `resultKey`.
+
+### Result shape
+
+```json
+{
+  "aggregate": {
+    "totalHolders": 20,
+    "analyzedHolders": 18,
+    "top1SupplyPct": 3.2,
+    "top5SupplyPct": 12.8,
+    "behaviorDistribution": [
+      { "behaviorType": "SWING_TRADER", "count": 7, "supplyPct": 22.4 },
+      { "behaviorType": "HODLER", "count": 4, "supplyPct": 14.1 },
+      { "behaviorType": "FRESH", "count": 3, "supplyPct": 8.7 }
+    ],
+    "avgWalletPnlSol": 34.2
+  },
+  "profiles": [
+    {
+      "walletAddress": "ADDR_1",
+      "rank": 1,
+      "supplyPercent": 3.2,
+      "behaviorType": "SWING_TRADER",
+      "exitPattern": "partial_exit",
+      "medianHoldTimeHours": 18.0,
+      "dataQualityTier": "GOLD",
+      "confidence": 0.91,
+      "completedCycleCount": 47,
+      "walletPnlSol": 91.5,
+      "solBalance": 12.1,
+      "holdingsSummary": {
+        "totalPositions": 14,
+        "totalCurrentHoldingsValueSol": 28.4,
+        "topHoldings": [
+          { "tokenAddress": "TOKEN_A", "valueSol": 12.1 },
+          { "tokenAddress": "TOKEN_B", "valueSol": 8.3 }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "tokenMint": "So11111111111111111111111111111111111111112",
+    "totalHoldersRequested": 20,
+    "totalHoldersAnalyzed": 18
+  }
+}
+```
+
+**Aggregate fields:**
+
+| Field | Description |
+|:------|:------------|
+| `top1SupplyPct` | Supply % held by rank-1 non-skipped holder |
+| `top5SupplyPct` | Supply % held by top-5 non-skipped holders |
+| `behaviorDistribution` | Count + supply % per behavior type, sorted by count. `FRESH` = analyzed but unclassifiable (not enough exits) |
+| `avgWalletPnlSol` | Mean all-time realized PnL across analyzed holders |
+
+:::note Result key
+Fetch the agent result using the `agentResultKey` from the 202 response. The full result is also available at `resultKey`.
+```
+GET /jobs/result/by-key?key=holder-profiles:agent:result:{jobId}
+```
+Both keys expire after **15 minutes**.
+:::
+
+<div class="example-label">Example request</div>
+
+```bash
+curl -X POST https://api.sova-intel.com/api/v1/intel/token/TOKEN_MINT/holders/agent \
+  -H "X-Api-Key: ak_your_key" \
+  -H "Content-Type: application/json" \
+  -d '{"topN": 20}'
+```
+
+---
+
 ## Wallet Similarity Analysis
 
 Detects behavioral overlap and coordinated trading patterns across 2–30 wallets. Returns pairwise similarity scores (token overlap + capital-weighted), global metrics, and detected clusters. Useful for identifying insider groups, coordinated wallets, or shared strategies.
@@ -195,6 +304,97 @@ GET /jobs/result/by-key?key=similarity:result:{requestId}
 
 ```bash
 curl -X POST https://api.sova-intel.com/api/v1/intel/wallets/similarity \
+  -H "X-Api-Key: ak_your_key" \
+  -H "Content-Type: application/json" \
+  -d '{"wallets": ["ADDR_1", "ADDR_2", "ADDR_3"]}'
+```
+
+---
+
+## Wallet Similarity Analysis — Agent
+
+Same analysis as `/similarity`, but the result is transformed into a compact, agent-friendly shape. A single `coordinationScore` (0–1) summarizes the group. Only pairs with meaningful signal are included (score ≥ 0.15 or ≥20 shared tokens). Pairs that cross coordination thresholds get a `flag`.
+
+<p class="request-credits">Request credits: <span class="credits-value">20</span></p>
+
+<div class="endpoint-header">
+  <span class="method method-post">POST</span>
+  <span class="endpoint-path">/intel/wallets/similarity/agent</span>
+</div>
+
+### Request Body
+
+| Field | Type | Required | Description |
+|:------|:-----|:--------:|:------------|
+| `wallets` | string[] | ✓ | 2–30 Solana wallet addresses |
+
+### Response — 202
+
+```json
+{
+  "status": "queued",
+  "jobId": "intel-similarity-agent-abc123",
+  "requestId": "intel-similarity-agent-1234-xyz",
+  "walletCount": 3,
+  "monitoringUrl": "/api/v1/jobs/intel-similarity-agent-abc123",
+  "resultKey": "similarity:result:intel-similarity-agent-1234-xyz",
+  "agentResultKey": "similarity:agent:result:intel-similarity-agent-1234-xyz"
+}
+```
+
+### Result shape
+
+```json
+{
+  "coordinationScore": 0.74,
+  "pairs": [
+    {
+      "walletA": "ADDR_1",
+      "walletB": "ADDR_2",
+      "similarityScore": 0.83,
+      "sharedTokenCount": 22,
+      "portfolioSizeA": 28,
+      "portfolioSizeB": 31,
+      "overlapPctA": 0.786,
+      "overlapPctB": 0.710,
+      "flag": "HIGH_SIMILARITY_AND_OVERLAP"
+    }
+  ],
+  "globalMetrics": {
+    "averageSimilarity": 0.74
+  },
+  "metadata": {
+    "walletsAnalyzed": 3,
+    "totalPairs": 3,
+    "meaningfulPairs": 2,
+    "flaggedPairs": 1
+  }
+}
+```
+
+**Pair fields:**
+
+| Field | Description |
+|:------|:------------|
+| `similarityScore` | Combined score: `binaryScore × 0.6 + capitalScore × 0.4` |
+| `overlapPctA` | Fraction of walletA's portfolio shared with walletB |
+| `overlapPctB` | Fraction of walletB's portfolio shared with walletA |
+| `flag` | `HIGH_SIMILARITY` (score > 0.7), `HIGH_OVERLAP` (>50% overlap or >20 shared tokens), or `HIGH_SIMILARITY_AND_OVERLAP` |
+
+**Pair filtering:** pairs with `similarityScore < 0.15` AND `sharedTokenCount < 20` are excluded as noise.
+
+:::note Result key
+Fetch the agent result using the `agentResultKey` from the 202 response.
+```
+GET /jobs/result/by-key?key=similarity:agent:result:{requestId}
+```
+Both keys expire after **15 minutes**.
+:::
+
+<div class="example-label">Example request</div>
+
+```bash
+curl -X POST https://api.sova-intel.com/api/v1/intel/wallets/similarity/agent \
   -H "X-Api-Key: ak_your_key" \
   -H "Content-Type: application/json" \
   -d '{"wallets": ["ADDR_1", "ADDR_2", "ADDR_3"]}'

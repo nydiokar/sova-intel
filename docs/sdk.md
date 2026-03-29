@@ -102,7 +102,11 @@ const batch = await client.batchHud(["addr1", "addr2", "addr3"]);
 for (const [address, hud] of Object.entries(batch.huds)) {
   console.log(address, hud.behaviorCode, hud.winRate);
 }
-console.log("No data:", batch.notFound);
+
+// Wallets queued for analysis (missing/stale) — each has a jobId to poll
+console.log("Queued:", batch.queued);
+// Wallets skipped (invalid, over limit, etc.)
+console.log("Skipped:", batch.skipped);
 ```
 
 ### Holder profiles — async (20cr)
@@ -164,6 +168,63 @@ console.log(jobs.holderProfiles.monitoringUrl);
 console.log(jobs.similarity.resultKey);
 ```
 
+### Agent-optimised holder profiles (20cr)
+
+Returns the same behavioral data as `pollHolderProfiles` but in a compact, agent-friendly shape: a population-level aggregate block first, then slim per-holder profiles (~1–2k tokens vs ~10k+ for the full shape).
+
+```typescript
+import type { AgentHolderProfilesResult } from "@sova-intel/sdk";
+
+const result = await client.pollTokenHoldersAgent(
+  "So11111111111111111111111111111111111111112",
+  20,
+);
+
+// Population-level signal — make a buy/skip decision without scanning profiles
+console.log(result.aggregate.top5SupplyPct);    // supply % by top 5 holders
+console.log(result.aggregate.avgWalletPnlSol);  // average holder PnL
+console.log(result.aggregate.behaviorDistribution);
+// [{ behaviorType: "SWING_TRADER", count: 8, supplyPct: 31.2 }, ...]
+
+// Per-holder profiles — currentHoldings[] replaced with holdingsSummary
+for (const holder of result.profiles) {
+  console.log(holder.rank, holder.behaviorType, holder.holdingsSummary.totalPositions);
+}
+```
+
+Use the queue variant if you need the job descriptor:
+
+```typescript
+const job = await client.queueTokenHoldersAgent("TOKEN_MINT", 20);
+// job.agentResultKey — fetch via GET /jobs/result/by-key?key={agentResultKey}
+// job.resultKey      — full developer result still available here
+```
+
+### Agent-optimised similarity (20cr)
+
+Returns a compact similarity result with a single `coordinationScore` (0–1), filtered meaningful pairs, and coordination flags. Debug fields and low-signal pairs are dropped.
+
+```typescript
+import type { AgentSimilarityResult } from "@sova-intel/sdk";
+
+const result = await client.pollWalletSimilarityAgent(["addr1", "addr2", "addr3"]);
+
+// Single number for quick agent decisions
+console.log(result.coordinationScore);  // 0.82 — high coordination signal
+
+// Only pairs that cleared the signal filter (score >= 0.15 OR >=20 shared tokens)
+for (const pair of result.pairs) {
+  console.log(pair.walletA, pair.walletB, pair.similarityScore);
+  if (pair.flag) {
+    console.log("Flag:", pair.flag);
+    // "HIGH_SIMILARITY" | "HIGH_OVERLAP" | "HIGH_SIMILARITY_AND_OVERLAP"
+  }
+}
+
+console.log(result.metadata.flaggedPairs);   // pairs with coordination signal
+console.log(result.metadata.meaningfulPairs); // total pairs with signal
+```
+
 ## Client Configuration
 
 ```typescript
@@ -211,11 +272,23 @@ import type {
   TokenPnlResponse,
   TokenPnlParams,
   BatchHudResponse,
+  BatchHudQueuedEntry,
   HolderProfile,
   HolderProfilesResult,
   SimilarityResult,
   SimilarityPairResult,
   SimilarityGlobalMetrics,
+  // Agent-optimised results
+  AgentHolderProfilesResult,
+  AgentHolderAggregate,
+  AgentHolderProfile,
+  AgentHoldingsSummary,
+  AgentSimilarityResult,
+  AgentSimilarityPair,
+  // Job accepted responses (agent variants)
+  HolderProfilesAgentJobAcceptedResponse,
+  SimilarityAgentJobAcceptedResponse,
+  // Async jobs
   JobAcceptedResponse,
   DeepJobAcceptedResponse,
   JobStatus,
@@ -236,7 +309,11 @@ import type {
 | `batchHud(wallets[])` | `POST /intel/wallets/batch-hud` | 5 |
 | `queueHolderProfiles(mint, topN?)` | `POST /intel/token/:mint/holders` | 20 |
 | `pollHolderProfiles(mint, topN?)` | same + auto-poll | 20 |
+| `queueTokenHoldersAgent(mint, topN?)` | `POST /intel/token/:mint/holders/agent` | 20 |
+| `pollTokenHoldersAgent(mint, topN?)` | same + auto-poll (agent result) | 20 |
 | `queueSimilarity(wallets[])` | `POST /intel/wallets/similarity` | 20 |
 | `pollSimilarity(wallets[])` | same + auto-poll | 20 |
+| `queueWalletSimilarityAgent(wallets[])` | `POST /intel/wallets/similarity/agent` | 20 |
+| `pollWalletSimilarityAgent(wallets[])` | same + auto-poll (agent result) | 20 |
 | `queueDeepAnalysis(mint, topN?)` | `POST /intel/token/:mint/holders/deep` | 35 |
 | `pollDeepAnalysis(mint, topN?)` | same + auto-poll both results | 35 |
