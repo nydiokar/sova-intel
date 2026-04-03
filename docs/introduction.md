@@ -53,7 +53,7 @@ Response:
 ```json
 {
   "walletAddress": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
-  "behaviorCode": "SWING_TRADER",
+  "behaviorCode": "W",
   "winRate": 0.67,
   "trimmedMeanPnl": 12.4,
   "dataQualityTier": "GOLD",
