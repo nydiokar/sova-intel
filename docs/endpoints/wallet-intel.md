@@ -48,14 +48,28 @@ Complete behavioral analysis, realized/unrealized PnL, HUD signal, and summary m
     "telegram": null
   },
   "hud": {
-    "behaviorCode": "SWING_TRADER",
+    "walletAddress": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
+    "signalType": "wallet_behavior_v1",
+    "behaviorCode": "W",
     "winRate": 0.67,
     "trimmedMeanPnl": 12.4,
+    "avgTxValueSol": 2.45,
+    "avgTradesPerDay": 4.2,
+    "medianHoldTimeHours": 12.1,
+    "uniqueTokensPerDay": 3.1,
+    "currentHoldingsSol": 45.2,
+    "currentHoldingsUsd": 81234.5,
+    "typicalEntryMcapUsd": 28000,
+    "dominantEntryMcapBucket": "10-20k",
     "dataQualityTier": "GOLD",
     "isBot": false,
     "isWhale": false,
-    "medianHoldTimeHours": 12.1,
-    "calculatedAt": "2026-03-03T11:30:00.000Z"
+    "calculatedAt": "2026-03-03T11:30:00.000Z",
+    "provenance": {
+      "provider": "alpha-node",
+      "schemaVersion": "1.0.0",
+      "generatedAt": "2026-03-03T11:30:00.000Z"
+    }
   },
   "behavior": {
     "tradingStyle": "swing",
@@ -64,11 +78,11 @@ Complete behavioral analysis, realized/unrealized PnL, HUD signal, and summary m
     "medianHoldTimeHours": 12.1,
     "buySellRatio": 0.98,
     "exitPattern": "partial_exit",
-    "avgEntryMcapUsd": 182000,
-    "typicalEntryMcapUsd": 145000,
-    "entryMcapP25Usd": 72000,
-    "entryMcapP75Usd": 310000,
-    "dominantEntryMcapBucket": "100k_to_250k",
+    "avgEntryMcapUsd": 34000,
+    "typicalEntryMcapUsd": 28000,
+    "entryMcapP25Usd": 12000,
+    "entryMcapP75Usd": 92000,
+    "dominantEntryMcapBucket": "10-20k",
     "dominantEntryMcapBucketShare": 0.41
   },
   "pnl": {
@@ -103,6 +117,22 @@ Complete behavioral analysis, realized/unrealized PnL, HUD signal, and summary m
 :::note KOL wallets
 KOL wallets are analyzed identically to any other trader — full PnL, behavior, and HUD data is available. The `kol` field is purely additive identity context.
 :::
+
+### Market-cap behavior fields
+
+The full profile's `behavior` object also carries these market-cap context fields:
+- `tradingStyle`
+- `speedCategory`
+- `avgHoldTimeHours`
+- `medianHoldTimeHours`
+- `buySellRatio`
+- `exitPattern`
+- `avgEntryMcapUsd`
+- `typicalEntryMcapUsd`
+- `entryMcapP25Usd`
+- `entryMcapP75Usd`
+- `dominantEntryMcapBucket`
+- `dominantEntryMcapBucketShare`
 
 ### Response — 202 (timeout fallback)
 
@@ -155,7 +185,8 @@ The fastest, cheapest signal for a wallet — behavior code, win rate, PnL quali
 ```json
 {
   "walletAddress": "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
-  "behaviorCode": "SWING_TRADER",
+  "signalType": "wallet_behavior_v1",
+  "behaviorCode": "W",
   "winRate": 0.67,
   "trimmedMeanPnl": 12.4,
   "avgTxValueSol": 2.45,
@@ -163,10 +194,18 @@ The fastest, cheapest signal for a wallet — behavior code, win rate, PnL quali
   "medianHoldTimeHours": 12.1,
   "uniqueTokensPerDay": 3.1,
   "currentHoldingsSol": 45.2,
+  "currentHoldingsUsd": 81234.5,
+  "typicalEntryMcapUsd": 28000,
+  "dominantEntryMcapBucket": "10-20k",
   "dataQualityTier": "GOLD",
   "isBot": false,
   "isWhale": false,
-  "calculatedAt": "2026-03-03T11:30:00.000Z"
+  "calculatedAt": "2026-03-03T11:30:00.000Z",
+  "provenance": {
+    "provider": "alpha-node",
+    "schemaVersion": "1.0.0",
+    "generatedAt": "2026-03-03T11:30:00.000Z"
+  }
 }
 ```
 
@@ -265,7 +304,7 @@ Score up to 30 wallets in a single call. Wallets without fresh data are automati
   "huds": {
     "ADDR_1": {
       "walletAddress": "ADDR_1",
-      "behaviorCode": "SWING_TRADER",
+      "behaviorCode": "W",
       "winRate": 0.67,
       "trimmedMeanPnl": 12.4,
       "dataQualityTier": "GOLD",

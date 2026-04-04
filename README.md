@@ -48,7 +48,7 @@ curl https://api.sova-intel.com/api/v1/intel/wallet/<address>/hud \
 ```json
 {
   "walletAddress": "7xKXtg...",
-  "behaviorCode": "SWING_TRADER",
+  "behaviorCode": "W",
   "winRate": 0.67,
   "trimmedMeanPnl": 12.4,
   "dataQualityTier": "GOLD",
