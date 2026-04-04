@@ -63,7 +63,13 @@ Complete behavioral analysis, realized/unrealized PnL, HUD signal, and summary m
     "avgHoldTimeHours": 18.4,
     "medianHoldTimeHours": 12.1,
     "buySellRatio": 0.98,
-    "exitPattern": "partial_exit"
+    "exitPattern": "partial_exit",
+    "avgEntryMcapUsd": 182000,
+    "typicalEntryMcapUsd": 145000,
+    "entryMcapP25Usd": 72000,
+    "entryMcapP75Usd": 310000,
+    "dominantEntryMcapBucket": "100k_to_250k",
+    "dominantEntryMcapBucketShare": 0.41
   },
   "pnl": {
     "allTime": {
@@ -82,6 +88,17 @@ Complete behavioral analysis, realized/unrealized PnL, HUD signal, and summary m
 | `kol.name` | string | Public name of the KOL |
 | `kol.twitter` | string \| null | Twitter/X profile URL |
 | `kol.telegram` | string \| null | Telegram profile or channel URL |
+| `behavior` | object \| null | Trading behavior summary for the wallet |
+| `behavior.tradingStyle` | string \| null | High-level style label such as `swing` |
+| `behavior.speedCategory` | string \| null | Pace bucket for how quickly the wallet turns positions |
+| `behavior.buySellRatio` | number \| null | Buy volume divided by sell volume across observed history |
+| `behavior.exitPattern` | string \| null | Typical exit style, such as `partial_exit` |
+| `behavior.avgEntryMcapUsd` | number \| null | Mean market cap at wallet entry across completed positions |
+| `behavior.typicalEntryMcapUsd` | number \| null | Typical market cap at entry, after trimming outliers |
+| `behavior.entryMcapP25Usd` | number \| null | 25th percentile of entry market caps |
+| `behavior.entryMcapP75Usd` | number \| null | 75th percentile of entry market caps |
+| `behavior.dominantEntryMcapBucket` | string \| null | Most common market-cap bucket the wallet enters in |
+| `behavior.dominantEntryMcapBucketShare` | number \| null | Share of completed entries that fall in the dominant bucket |
 
 :::note KOL wallets
 KOL wallets are analyzed identically to any other trader — full PnL, behavior, and HUD data is available. The `kol` field is purely additive identity context.

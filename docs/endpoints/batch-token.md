@@ -376,12 +376,21 @@ Same analysis as `/similarity`, but the result is transformed into a compact, ag
 
 | Field | Description |
 |:------|:------------|
+| `coordinationScore` | Weighted average of meaningful pair scores across the group, scaled `0-1`. Higher means the submitted wallets look more coordinated overall. |
 | `similarityScore` | Combined score: `binaryScore × 0.6 + capitalScore × 0.4` |
 | `overlapPctA` | Fraction of walletA's portfolio shared with walletB |
 | `overlapPctB` | Fraction of walletB's portfolio shared with walletA |
 | `flag` | `HIGH_SIMILARITY` (score > 0.7), `HIGH_OVERLAP` (>50% overlap or >20 shared tokens), or `HIGH_SIMILARITY_AND_OVERLAP` |
 
 **Pair filtering:** pairs with `similarityScore < 0.15` AND `sharedTokenCount < 20` are excluded as noise.
+
+**Metadata fields:**
+
+| Field | Description |
+|:------|:------------|
+| `metadata.totalPairs` | All possible pair combinations for the submitted wallet set: `n * (n - 1) / 2` |
+| `metadata.meaningfulPairs` | Pairs that cleared the noise filter and appear in `pairs[]` |
+| `metadata.flaggedPairs` | Pairs that crossed one of the coordination thresholds and received a `flag` |
 
 :::note Result key
 Fetch the agent result using the `agentResultKey` from the 202 response.

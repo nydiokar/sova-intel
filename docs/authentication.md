@@ -5,6 +5,8 @@ sidebar_position: 2
 
 # Authentication
 
+<a id="x402-autonomous-solana-usdc-payment"></a>
+
 All Intel endpoints require authentication. Two methods are supported.
 
 ## API Key

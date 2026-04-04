@@ -31,6 +31,21 @@
   box-shadow: 0 1px 0 0 var(--ifm-toc-border-color);
 }
 
+.navbar__brand {
+  gap: 0.6rem;
+}
+
+.navbar__logo {
+  margin-right: 0;
+}
+
+.navbar__logo img {
+  display: block;
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+}
+
 .navbar__title {
   font-weight: 700;
   letter-spacing: -0.01em;
