@@ -5,7 +5,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 const config: Config = {
   title: "Sova Intel",
   tagline: "On-chain intelligence API for Solana",
-  favicon: "img/favicon.ico",
+  favicon: "img/logo.svg",
   url: "https://docs.sova-intel.com",
   baseUrl: "/",
   organizationName: "nydiokar",

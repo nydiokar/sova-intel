@@ -46,6 +46,11 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "doc",
+      id: "mcp",
+      label: "MCP Server",
+    },
+    {
+      type: "doc",
       id: "sdk",
       label: "TypeScript SDK",
     },

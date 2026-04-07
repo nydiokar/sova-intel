@@ -81,3 +81,7 @@ See the [SDK Quickstart](/sdk) for full setup and examples.
 | [Job Polling](/endpoints/async-jobs) | Job status polling, result fetch | Status: no — Result: yes |
 | [Pricing](/pricing) | Credit costs and pack options | No |
 | [skill.md](https://www.sova-intel.com/skill.md) | Machine-readable descriptor for x402-capable agents | No |
+
+:::tip Use from any AI client — no code required
+The [`@sova-intel/mcp`](https://www.npmjs.com/package/@sova-intel/mcp) package wraps the full API as an MCP server. Add it to Claude, Cursor, or any MCP-compatible client and query wallets in plain language. See the [MCP Server](/mcp) guide.
+:::
