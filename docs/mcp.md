@@ -21,7 +21,7 @@ The `@sova-intel/mcp` package exposes the full Sova Intel API as an [MCP](https:
 <summary>Claude Code (one command)</summary>
 
 ```bash
-claude mcp add sova-intel -e SOVA_API_KEY=ak_your_key -- npx -y @sova-intel/mcp
+claude mcp add sova-intel -e SOVA_API_KEY=ak_your_key -- npx -y "@sova-intel/mcp"
 ```
 
 Restart Claude Code and confirm `sova-intel` appears connected with `/mcp`.

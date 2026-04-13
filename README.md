@@ -40,7 +40,7 @@ Add to Claude, Cursor, or any MCP-compatible client and query wallets and token 
 **Claude Code** (one command):
 
 ```bash
-claude mcp add sova-intel -e SOVA_API_KEY=ak_your_key -- npx -y @sova-intel/mcp
+claude mcp add sova-intel -e SOVA_API_KEY=ak_your_key -- npx -y "@sova-intel/mcp"
 ```
 
 **Claude Desktop / Cursor** (`claude_desktop_config.json` or `.cursor/mcp.json`):
